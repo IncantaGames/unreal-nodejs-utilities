@@ -3,6 +3,7 @@
   "references": [
     { "path": "auth" },
     { "path": "cli" },
+    { "path": "epic-api" },
     { "path": "marketplace" }
   ]
 }
