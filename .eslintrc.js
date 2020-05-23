@@ -8,4 +8,9 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
   ],
+  rules: {
+    "@typescript-eslint/ban-ts-comment": "off",
+    "no-console": "warn",
+    "semi": "error"
+  }
 };

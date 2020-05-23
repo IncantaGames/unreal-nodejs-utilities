@@ -42,5 +42,6 @@
     "ts-jest": "25.2.1",
     "typescript": "3.9.3"
   },
-  "dependencies": {}
+  "dependencies": {
+  }
 }
