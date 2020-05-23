@@ -1,0 +1,9 @@
+{
+  "name": "@node-ue4/cli",
+  "version": "1.0.0-alpha.0",
+  "description": "",
+  "main": "lib/index.js",
+  "repository": "git@github.com:seeseplusplus/node-ue4.git",
+  "author": "SeesePlusPlus LLC",
+  "license": "MIT"
+}

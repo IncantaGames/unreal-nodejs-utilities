@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "auth" },
+    { "path": "cli" },
+    { "path": "marketplace" }
+  ]
+}
