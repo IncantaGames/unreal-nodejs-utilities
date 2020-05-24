@@ -1,7 +1,10 @@
 import configstore from "configstore";
 import prompts from "prompts";
 import { AuthSession, User } from "@node-ue4/auth";
-import { LoginStatus } from "@node-ue4/epic-api";
+import { LoginStatus, IEpicAssetDetail } from "@node-ue4/epic-api";
+import { getVaultInfo, downloadAsset } from "@node-ue4/marketplace";
+import { EventEmitter } from "events";
+import CliProgress, { SingleBar } from "cli-progress";
 
 export class LocalSession {
   public config: configstore;
@@ -90,5 +93,49 @@ export class LocalSession {
     this.config.set("email", email);
     this.config.set("session", this.auth.sessionDetails);
     console.log("Successfully logged in");
+  }
+
+  public async getVaultAssets(): Promise<IEpicAssetDetail[]> {
+    if (!this.loggedIn()) {
+      throw new Error("You're currently not logged in");
+    }
+
+    const assets = await getVaultInfo(this.auth!);
+    return assets;
+  }
+
+  public async downloadAsset(assetId: string, versionId: string): Promise<void> {
+    if (!this.loggedIn()) {
+      throw new Error("You're currently not logged in");
+    }
+
+    const progressEmitter = new EventEmitter();
+
+    let bar: SingleBar;
+
+    progressEmitter.on("start", (e) => {
+      console.log(`Starting ${e.name}`);
+      bar = new SingleBar({}, CliProgress.Presets.shades_classic);
+      bar.start(e.total, 0);
+    });
+
+    progressEmitter.on("end", (e) => {
+      console.log(`Finished ${e.name}`);
+      bar.stop();
+    });
+
+    progressEmitter.on("progress", (e) => {
+      bar.update(e.finished);
+    });
+
+    await downloadAsset(
+      this.auth!,
+      "./download",
+      {
+        assetId,
+        versionId,
+      },
+      progressEmitter
+    );
   }
 }

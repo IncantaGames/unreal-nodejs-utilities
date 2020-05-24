@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 import { AuthSession } from "@node-ue4/auth";
 import {
   IDownloadDetails,
@@ -8,7 +10,12 @@ import {
   ExtractAssetFilesFromChunks
 } from "@node-ue4/epic-api";
 
-export async function downloadAsset(session: AuthSession, downloadDir: string, details: IDownloadDetails): Promise<void> {
+export async function downloadAsset(
+  session: AuthSession,
+  downloadDir: string,
+  details: IDownloadDetails,
+  progressEmitter?: EventEmitter
+): Promise<void> {
   if (!session.sessionDetails) {
     throw new Error("You haven't logged in yet? Shouldn't be possible");
   }
@@ -16,8 +23,8 @@ export async function downloadAsset(session: AuthSession, downloadDir: string, d
   const buildInfo = await GetItemBuildInfo(session.transport, session.sessionDetails, details);
   const manifest = await GetItemManifest(session.transport, buildInfo);
   const chunkList = BuildItemChunkListFromManifest(buildInfo, manifest);
-  const chunkDir = await DownloadItemChunkList(session.transport, manifest, chunkList, downloadDir);
-  await ExtractAssetFilesFromChunks(manifest, chunkDir);
+  const chunkDir = await DownloadItemChunkList(session.transport, manifest, chunkList, downloadDir, progressEmitter);
+  await ExtractAssetFilesFromChunks(manifest, chunkDir, progressEmitter);
 
   // BuildItemChunkListFromManifest(buildInfo, manifest);
   // // const chunkDir = await DownloadItemChunkList(this.transport, manifest, chunkList, downloadDir);

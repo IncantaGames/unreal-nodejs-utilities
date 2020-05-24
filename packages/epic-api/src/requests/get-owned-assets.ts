@@ -103,9 +103,13 @@ export async function GetOwnedAssets(transport: AxiosInstance, sessionDetails: I
   }
 
   const detailedAssets: IEpicAssetDetail[] = [];
+  const retrievedAssets = new Set<string>();
 
   // lets do this in serial to make sure session handshakes are okay
   for (const asset of assets) {
+    if (retrievedAssets.has(asset.catalogItemId)) {
+      continue;
+    }
     const detailResponse = await transport.get(`https://catalog-public-service-prod06.ol.epicgames.com/catalog/api/shared/bulk/items?id=${asset.catalogItemId}&includeDLCDetails=false&includeMainGameDetails=false&country=US&locale=en`, {
       headers: {
         Authorization: `${sessionDetails.token_type} ${sessionDetails.access_token}`
@@ -123,6 +127,7 @@ export async function GetOwnedAssets(transport: AxiosInstance, sessionDetails: I
     }) !== undefined;
 
     if (isAsset) {
+      retrievedAssets.add(asset.catalogItemId);
       detailedAssets.push(detail);
     }
   }

@@ -10,20 +10,18 @@ import {
   GetOauth,
   IEpicOauthResponse,
   IEpicAssetDetail,
-  LoginStatus
+  LoginStatus,
+  GetOwnedAssets
 } from "@node-ue4/epic-api";
 
 export class AuthSession {
   private user: User;
   public transport: AxiosInstance;
   public sessionDetails: IEpicOauthResponse | null;
-  public assets: IEpicAssetDetail[];
 
   constructor(user: User, priorSessionDetails?: IEpicOauthResponse) {
     this.sessionDetails = priorSessionDetails || null;
     this.user = user;
-
-    this.assets = [];
 
     this.transport = axios.create({
       withCredentials: true,
@@ -63,5 +61,5 @@ export class AuthSession {
 
   public getEmail(): string {
     return this.user.email;
-   }
+  }
 }
