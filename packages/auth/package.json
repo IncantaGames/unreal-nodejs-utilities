@@ -6,12 +6,12 @@
   "repository": "git@github.com:seeseplusplus/node-ue4.git",
   "author": "SeesePlusPlus LLC",
   "license": "MIT",
+  "devDependencies": {
+    "@types/axios": "^0.14.0"
+  },
   "dependencies": {
     "@node-ue4/epic-api": "1.0.0-alpha.0",
     "axios": "^0.19.2",
     "axios-cookiejar-support": "^1.0.0"
-  },
-  "devDependencies": {
-    "@types/axios": "^0.14.0"
   }
 }

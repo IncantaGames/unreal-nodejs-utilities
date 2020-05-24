@@ -2,28 +2,21 @@ import axios, { AxiosInstance } from "axios";
 import axiosCookieJarSupport from "axios-cookiejar-support";
 import tough from "tough-cookie";
 
-import User from "./user";
+import { User } from "./user";
 import {
   InitializeSessionCookies,
   Login,
   SendMFA,
   GetOauth,
   IEpicOauthResponse,
-  IDownloadDetails,
-  GetItemBuildInfo,
-  GetItemManifest,
-  BuildItemChunkListFromManifest,
-  DownloadItemChunkList,
-  ExtractAssetFilesFromChunks,
-  GetOwnedAssets,
   IEpicAssetDetail,
   LoginStatus
 } from "@node-ue4/epic-api";
 
-export default class AuthSession {
+export class AuthSession {
   private user: User;
-  private transport: AxiosInstance;
-  private sessionDetails: IEpicOauthResponse | null;
+  public transport: AxiosInstance;
+  public sessionDetails: IEpicOauthResponse | null;
   public assets: IEpicAssetDetail[];
 
   constructor(user: User) {
@@ -60,29 +53,5 @@ export default class AuthSession {
 
   public async initializeOauth(): Promise<void> {
     this.sessionDetails = await GetOauth(this.transport);
-  }
-
-  public async getAssets(): Promise<void> {
-    if (!this.sessionDetails) {
-      throw new Error("You haven't logged in yet? Shouldn't be possible");
-    }
-
-    this.assets = await GetOwnedAssets(this.transport, this.sessionDetails);
-  }
-
-  public async downloadAsset(downloadDir: string, details: IDownloadDetails): Promise<void> {
-    if (!this.sessionDetails) {
-      throw new Error("You haven't logged in yet? Shouldn't be possible");
-    }
-
-    const buildInfo = await GetItemBuildInfo(this.transport, this.sessionDetails, details);
-    const manifest = await GetItemManifest(this.transport, buildInfo);
-    const chunkList = BuildItemChunkListFromManifest(buildInfo, manifest);
-    const chunkDir = await DownloadItemChunkList(this.transport, manifest, chunkList, downloadDir);
-    await ExtractAssetFilesFromChunks(manifest, chunkDir);
-
-    // BuildItemChunkListFromManifest(buildInfo, manifest);
-    // // const chunkDir = await DownloadItemChunkList(this.transport, manifest, chunkList, downloadDir);
-    // await ExtractAssetFilesFromChunks(manifest, path.join(downloadDir, "Stylized5e206b0811e4V1", "chunks"));
   }
 }

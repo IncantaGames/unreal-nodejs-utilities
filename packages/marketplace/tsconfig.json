@@ -5,5 +5,8 @@
     "rootDir": "src"
   },
   "include": ["./src/**/*.ts"],
-  "references": []
+  "references": [
+    { "path": "../auth" },
+    { "path": "../epic-api" }
+  ]
 }
