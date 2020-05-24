@@ -19,10 +19,12 @@ export class AuthSession {
   public sessionDetails: IEpicOauthResponse | null;
   public assets: IEpicAssetDetail[];
 
-  constructor(user: User) {
-    this.sessionDetails = null;
-    this.assets = [];
+  constructor(user: User, priorSessionDetails?: IEpicOauthResponse) {
+    this.sessionDetails = priorSessionDetails || null;
     this.user = user;
+
+    this.assets = [];
+
     this.transport = axios.create({
       withCredentials: true,
       headers: {
@@ -43,8 +45,12 @@ export class AuthSession {
     this.user.password = password;
   }
 
-  public async login(): Promise<LoginStatus> {
-    return await Login(this.transport, this.user.email, this.user.password);
+  public async login(captcha: string): Promise<LoginStatus> {
+    if (!this.user.password) {
+      throw new Error("The current session doesn't have a password attached. This is likely a client issue.");
+    }
+
+    return await Login(this.transport, this.user.email, this.user.password, captcha);
   }
 
   public async sendMFA(method: "email" | "authenticator", code: string): Promise<LoginStatus> {
@@ -54,4 +60,8 @@ export class AuthSession {
   public async initializeOauth(): Promise<void> {
     this.sessionDetails = await GetOauth(this.transport);
   }
+
+  public getEmail(): string {
+    return this.user.email;
+   }
 }

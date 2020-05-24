@@ -13,7 +13,7 @@ export enum LoginStatus {
   Error
 }
 
-export async function Login(transport: AxiosInstance, email: string, password: string): Promise<LoginStatus> {
+export async function Login(transport: AxiosInstance, email: string, password: string, captcha: string): Promise<LoginStatus> {
   // grab a XSRF cookie
   await transport.get("https://www.epicgames.com/id/api/csrf", {
     headers: {
@@ -38,7 +38,7 @@ export async function Login(transport: AxiosInstance, email: string, password: s
       "email": email,
       "password": password,
       "rememberMe": true,
-      "captcha": "",
+      "captcha": captcha,
     },
     {
       headers: {
@@ -58,68 +58,63 @@ export async function Login(transport: AxiosInstance, email: string, password: s
   } else if (loginResult.status === 200) {
     return LoginStatus.LoggedIn;
   } else {
+    console.error(`Received status: ${loginResult.status}`);
+    console.error(loginResult.data);
     return LoginStatus.Error;
   }
 }
 
 export async function SendMFA(transport: AxiosInstance, method: "email" | "authenticator", code: string): Promise<LoginStatus> {
-  let mfaResult: AxiosResponse<any> | undefined;
-  do {
-    if (typeof mfaResult !== "undefined") {
-      console.log("That 2FA response didn't work. Please try again.");
-    } else {
-      console.log("Your account requires 2FA. Please check your email or authenticator app for a code and enter the details below.");
-    }
+  const jar = transport.defaults.jar as CookieJar;
 
-    const jar = transport.defaults.jar as CookieJar;
-  
-    let xsrfCookie: Cookie.Serialized | undefined;
-    xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
-  
-    if (!xsrfCookie) {
-      throw new Error("Could not get the XSRF token?");
-    }
+  let xsrfCookie: Cookie.Serialized | undefined;
+  xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
 
-    // grab a new XSRF cookie
-    await transport.get("https://www.epicgames.com/id/api/csrf", {
+  if (!xsrfCookie) {
+    throw new Error("Could not get the XSRF token?");
+  }
+
+  // grab a new XSRF cookie
+  await transport.get("https://www.epicgames.com/id/api/csrf", {
+    headers: {
+      Referrer: "https://www.epicgames.com/id/login",
+      "X-Epic-Event-Action": "login",
+      "X-Epic-Event-Category": "login",
+      "X-Epic-Strategy-Flags": "guardianEmailVerifyEnabled=true;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false",
+      "X-Requested-With": "XMLHttpRequest",
+      "X-XSRF-TOKEN": xsrfCookie.value
+    }
+  });
+
+  xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
+
+  if (!xsrfCookie) {
+    throw new Error("Could not get the XSRF token?");
+  }
+
+  const mfaResult = await transport.post("https://www.epicgames.com/id/api/login/mfa",
+    {
+      "method": method,
+      "code": code,
+      "rememberDevice": true,
+    },
+    {
       headers: {
-        Referrer: "https://www.epicgames.com/id/login",
-        "X-Epic-Event-Action": "login",
+        Referrer: "https://www.epicgames.com/id/login/mfa",
+        "Content-Type": "application/json;charset=UTF-8",
+        "X-Epic-Event-Action": "mfa",
         "X-Epic-Event-Category": "login",
         "X-Epic-Strategy-Flags": "guardianEmailVerifyEnabled=true;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false",
         "X-Requested-With": "XMLHttpRequest",
         "X-XSRF-TOKEN": xsrfCookie.value
       }
-    });
-
-    xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
-
-    if (!xsrfCookie) {
-      throw new Error("Could not get the XSRF token?");
     }
-
-    mfaResult = await transport.post("https://www.epicgames.com/id/api/login/mfa",
-      {
-        "method": method,
-        "code": code,
-        "rememberDevice": true,
-      },
-      {
-        headers: {
-          Referrer: "https://www.epicgames.com/id/login/mfa",
-          "Content-Type": "application/json;charset=UTF-8",
-          "X-Epic-Event-Action": "mfa",
-          "X-Epic-Event-Category": "login",
-          "X-Epic-Strategy-Flags": "guardianEmailVerifyEnabled=true;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-XSRF-TOKEN": xsrfCookie.value
-        }
-      }
-    );
-  } while (mfaResult === undefined || mfaResult.status === 400 || mfaResult.status === 409);
+  );
 
   if (mfaResult.status === 200) {
     return LoginStatus.LoggedIn;
+  } else if (mfaResult.status === 400 || mfaResult.status === 409) {
+    return LoginStatus.NeedsMFA;
   } else {
     return LoginStatus.Error;
   }

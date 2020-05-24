@@ -5,5 +5,17 @@
   "main": "lib/index.js",
   "repository": "git@github.com:seeseplusplus/node-ue4.git",
   "author": "SeesePlusPlus LLC",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/configstore": "^4.0.0",
+    "@types/prompts": "^2.0.8"
+  },
+  "dependencies": {
+    "@node-ue4/auth": "1.0.0-alpha.0",
+    "@node-ue4/marketplace": "1.0.0-alpha.0",
+    "commander": "^5.1.0",
+    "configstore": "^5.0.1",
+    "prompts": "^2.3.2",
+    "yargs": "^15.3.1"
+  }
 }
