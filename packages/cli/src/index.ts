@@ -10,6 +10,7 @@
 import { program } from "commander";
 
 import { login } from "./login";
+import { whoami } from "./whoami";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require("../package.json");
@@ -17,7 +18,13 @@ const pkg = require("../package.json");
 program
   .command("login [email]")
   .description("Login to your epicgames.com account")
-  .action(login)
-  .version(pkg.version);
+  .action(login);
+
+program
+  .command("whoami")
+  .description("Get information about the authenticated account")
+  .action(whoami);
+
+program.version(pkg.version);
 
 program.parse(process.argv);
