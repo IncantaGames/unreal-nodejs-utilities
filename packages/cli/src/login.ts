@@ -1,5 +1,4 @@
 import prompts from "prompts";
-// import { Launcher } from "epicgames-client";
 
 import { LocalSession } from "./local-session";
 
@@ -41,16 +40,4 @@ export async function login(email?: string): Promise<void> {
   }) as { password: string };
 
   await session.login(email, password);
-  // const launcher = new Launcher({
-  //   email,
-  //   password,
-  // });
-
-  // await launcher.init();
-  // await launcher.login({
-  //   captcha: async (reputation: any, captchaData: any, meta: any) => {
-  //     return captchaData.token;
-  //   }
-  // });
-  // console.log(launcher.account);
 }
