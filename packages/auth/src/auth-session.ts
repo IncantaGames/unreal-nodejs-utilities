@@ -47,7 +47,7 @@ export class AuthSession {
     return await Login(this.transport, this.user.email, this.user.password);
   }
 
-  public async sendMFA(method: "email" | "code", code: string): Promise<LoginStatus> {
+  public async sendMFA(method: "email" | "authenticator", code: string): Promise<LoginStatus> {
     return await SendMFA(this.transport, method, code);
   }
 

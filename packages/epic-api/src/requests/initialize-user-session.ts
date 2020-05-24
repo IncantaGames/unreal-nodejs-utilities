@@ -62,7 +62,7 @@ export async function Login(transport: AxiosInstance, email: string, password: s
   }
 }
 
-export async function SendMFA(transport: AxiosInstance, method: "email" | "code", code: string): Promise<LoginStatus> {
+export async function SendMFA(transport: AxiosInstance, method: "email" | "authenticator", code: string): Promise<LoginStatus> {
   let mfaResult: AxiosResponse<any> | undefined;
   do {
     if (typeof mfaResult !== "undefined") {
