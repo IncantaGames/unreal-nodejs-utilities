@@ -2,6 +2,11 @@ import { AxiosInstance, AxiosResponse } from "axios";
 import { CookieJar, Cookie } from "tough-cookie";
 import { IEpicOauthResponse } from "./epic-oauth-response";
 
+// Imported to give us the `jar` type
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import axiosCookieJarSupport from "axios-cookiejar-support";
+
 export enum LoginStatus {
   LoggedIn,
   NeedsMFA,
@@ -20,7 +25,7 @@ export async function Login(transport: AxiosInstance, email: string, password: s
     }
   });
 
-  const jar = (transport.defaults as any).jar as CookieJar;
+  const jar = transport.defaults.jar as CookieJar;
 
   const xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
 
@@ -57,7 +62,7 @@ export async function Login(transport: AxiosInstance, email: string, password: s
   }
 }
 
-export async function SendMFA(transport: AxiosInstance, method: string, code: string): Promise<LoginStatus> {
+export async function SendMFA(transport: AxiosInstance, method: "email" | "code", code: string): Promise<LoginStatus> {
   let mfaResult: AxiosResponse<any> | undefined;
   do {
     if (typeof mfaResult !== "undefined") {
@@ -66,7 +71,7 @@ export async function SendMFA(transport: AxiosInstance, method: string, code: st
       console.log("Your account requires 2FA. Please check your email or authenticator app for a code and enter the details below.");
     }
 
-    const jar = (transport.defaults as any).jar as CookieJar;
+    const jar = transport.defaults.jar as CookieJar;
   
     let xsrfCookie: Cookie.Serialized | undefined;
     xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
@@ -121,7 +126,7 @@ export async function SendMFA(transport: AxiosInstance, method: string, code: st
 }
 
 export async function GetOauth(transport: AxiosInstance): Promise<IEpicOauthResponse> {
-  const jar = (transport.defaults as any).jar as CookieJar;
+  const jar = transport.defaults.jar as CookieJar;
 
   const xsrfCookie = jar.serializeSync().cookies.filter(cookie => cookie.key === "XSRF-TOKEN")[0];
 

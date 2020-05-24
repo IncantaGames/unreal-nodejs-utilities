@@ -9,7 +9,8 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/rimraf": "^3.0.0",
-    "@types/tough-cookie": "^4.0.0"
+    "@types/tough-cookie": "^4.0.0",
+    "axios-cookiejar-support": "^1.0.0"
   },
   "dependencies": {
     "rimraf": "^3.0.2",
