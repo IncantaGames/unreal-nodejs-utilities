@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@node-ue4/epic-api": "1.0.0-alpha.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "axios-cookiejar-support": "^1.0.0"
   }
 }
